@@ -1,12 +1,21 @@
 # Test-Time Scaling in Reasoning Models for Knowledge-Intensive Tasks
 This repository contains the data and code for our paper: ["Test-time scaling in reasoning models is not effective for knowledge-intensive tasks yet"](http://arxiv.org/abs/2509.06861)  
 
+## Update (October 2025):
+We have added results for **GPT-5** and **Gemini 2.5 Pro**. Model outputs are available in the `outputs/` folder, and new figures have been added to the `figures/` folder. 
+
+**Key observations:**
+
+- GPT-5 follows similar trends as other models, where test-time scaling does not consistently improve accuracy or reduce hallucinations on knowledge-intensive tasks. 
+- Gemini 2.5 Pro shows increased accuracy with higher thinking budgets, similar to Gemini 2.5 Flash. On SimpleQA, it does not show reduced hallucinations with more reasoning. On FRAMES, under a low thinking budget, Gemini 2.5 Pro tends to answer, rather than abstain, leading to more hallucinations. 
+ 
+We will include further analysis in the next version of our manuscript.
+
 ## Overview
 This repository contains the `benchmarks`, `code` and `model outputs` for all experiments. It includes:
 1. `benchmarks/`: Datasets used in our experiments: SimpleQA and FRAMES.
 2. `code`: Scripts to run experiments and evaluate model responses.
-3. `outputs/`: Evaluated model outputs from 12 reasoning models with different thinking levels on 2 benchmarks.
-
+3. `outputs/`: Evaluated model outputs from 14 reasoning models with different thinking levels on 2 benchmarks.
 
 ## Benchmarks
 - SimpleQA: 800 short, fact-seeking questions randomly sampled from [OpenAI SimpleQA](https://openai.com/index/introducing-simpleqa/)
@@ -52,7 +61,7 @@ Run experiments on **XAI Grok** models:
 python grok_generate.py --effort low --api_key 'your_xai_api_key'
 ```
 
-Run experiments on **Gemini** models. You can adjust the `--thinking_budget` parameter to set different thinking levels. Disable the `thinking` mode by setting `--thinking_budget` to 0.
+Run experiments on **Gemini** models. You can adjust the `--thinking_budget` parameter to set different thinking levels. Disable the `thinking` mode by setting `--thinking_budget` to 0. Note that only Gemini 2.5 Flash supports a `thinking_budget` of 0; the minimum budget for Gemini 2.5 Pro is 128. See [Gemini API documentation](https://ai.google.dev/gemini-api/docs/thinking) for more details.
 
 ```bash
 python gemini_generate.py --thinking_budget 512 --api_key 'your_google_api_key'
@@ -97,7 +106,7 @@ python evaluation.py --input_path '<model_response_file_path.jsonl>' --api_key '
 ```
 
 ## Model Outputs
-We release evaluated outputs from 12 reasoning models with varying thinking levels (including *non-thinking* for several models). Each output includes: model response, reasoning trace (if applicable), and evaluation label (*correct* [A], *incorrect* [B], or *not attempted* [C]), and metadata such as token count.
+We release evaluated outputs from 14 reasoning models with varying thinking levels (including *non-thinking* for several models). Each output includes: model response, reasoning trace (if applicable), and evaluation label (*correct* [A], *incorrect* [B], or *not attempted* [C]), and metadata such as token count.
 
 ## Citation
 If you find our code or data useful, please cite:
