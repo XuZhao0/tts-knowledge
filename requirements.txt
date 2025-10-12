@@ -17,7 +17,7 @@ filelock==3.18.0
 fsspec==2025.7.0
 google==3.0.0
 google-auth==2.40.3
-google-genai==1.29.0
+google-genai==1.36.0
 h11==0.16.0
 hf-xet==1.1.7
 httpcore==1.0.9
@@ -33,8 +33,10 @@ jiter==0.10.0
 jupyter_client==8.6.3
 jupyter_core==5.8.1
 kernels==0.9.0
+markdown-it-py==4.0.0
 MarkupSafe==3.0.2
 matplotlib-inline==0.1.7
+mdurl==0.1.2
 mpmath==1.3.0
 nest_asyncio==1.6.0
 networkx==3.4.2
@@ -53,7 +55,7 @@ nvidia-cusparselt-cu12==0.6.3
 nvidia-nccl-cu12==2.26.2
 nvidia-nvjitlink-cu12==12.6.85
 nvidia-nvtx-cu12==12.6.77
-openai==1.99.3
+openai==1.107.2
 packaging==25.0
 parso==0.8.4
 pexpect==4.9.0
@@ -74,6 +76,7 @@ PyYAML==6.0.2
 pyzmq==27.0.1
 regex==2025.7.34
 requests==2.32.4
+rich==14.2.0
 rsa==4.9.1
 safetensors==0.5.3
 setuptools==78.1.1
