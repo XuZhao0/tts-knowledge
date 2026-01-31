@@ -1,15 +1,5 @@
 # Test-Time Scaling in Reasoning Models for Knowledge-Intensive Tasks
-This repository contains the data and code for our paper: ["Test-time scaling in reasoning models is not effective for knowledge-intensive tasks yet"](http://arxiv.org/abs/2509.06861)  
-
-## Update (October 2025):
-We have added results for **GPT-5** and **Gemini 2.5 Pro**. Model outputs are available in the `outputs/` folder, and new figures have been added to the `figures/` folder. 
-
-**Key observations:**
-
-- GPT-5 follows similar trends as other models, where test-time scaling does not consistently improve accuracy or reduce hallucinations on knowledge-intensive tasks. 
-- Gemini 2.5 Pro shows increased accuracy with higher thinking budgets, similar to Gemini 2.5 Flash. On SimpleQA, it does not show reduced hallucinations with more reasoning. On FRAMES, under a low thinking budget, Gemini 2.5 Pro tends to answer, rather than abstain, leading to more hallucinations. 
- 
-We will include further analysis in the next version of our manuscript.
+This repository contains the data and code for the paper: ["Test-time scaling in reasoning models is not effective for knowledge-intensive tasks yet"](http://arxiv.org/abs/2509.06861)  
 
 ## Overview
 This repository contains the `benchmarks`, `code` and `model outputs` for all experiments. It includes:
