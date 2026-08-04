@@ -1,4 +1,4 @@
-"""This file is used to generate responses from OpenAI closed-source models."""
+"""Generate responses from OpenAI closed-source models."""
 import concurrent.futures
 import argparse
 import logging

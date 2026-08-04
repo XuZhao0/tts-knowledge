@@ -1,4 +1,4 @@
-"""This file is used to evaluate responses."""
+"""Evaluate model responses using an OpenAI grader model."""
 """Prompt is from OpenAI simple-evals: https://github.com/openai/simple-evals"""
 import concurrent.futures
 from tqdm import tqdm

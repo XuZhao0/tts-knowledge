@@ -1,3 +1,5 @@
+"""Shared client and JSONL helpers for the runnable scripts."""
+
 import json
 from typing import Union
 

@@ -1,72 +1,76 @@
-"""This file is used to generate responses from XAI Grok-3 models."""
+"""Generate responses from Google Gemini models."""
 import argparse
 import logging
 import time
 import random
 import os
-import traceback
 import concurrent.futures
 from datetime import datetime
 from tqdm import tqdm
 from tool import *
+from google.genai import types
 
-def generate_responses(prompt, args):
-    xai_client = load_xai_client(api_key=args.api_key)
+def generate_response(prompt, args):
     
-    completion = xai_client.chat.completions.create(
+    gemini_client = load_gemini_client(api_key=args.api_key)
+    
+    completion = gemini_client.models.generate_content(
         model= args.model,
-        reasoning_effort= args.effort,
-        messages = [
-            {
-                "role": "user",
-                "content": prompt,
-            },
-        ],
-        temperature=args.temperature
+        contents=prompt,
+        config=types.GenerateContentConfig(
+        thinking_config=types.ThinkingConfig(thinking_budget=args.thinking_budget,
+                                              include_thoughts=True)
+        )
     )
-    return completion.choices[0].message.content, completion
+    
+    thought_summary = ""
+    
+    if args.thinking_budget != 0:
+        for part in completion.candidates[0].content.parts:
+            if not part.text:
+                continue
+            if part.thought:
+                thought_summary += part.text
+           
+    return completion.text, completion, thought_summary
 
 def process_task(task, args, max_retries=5):
-    
+
     prompt = """Give me the answer to the following question only when you are sure of it. \
 Otherwise, say 'I don't know'. Put your answer on its own line after 'Answer:'.\n""" + task['problem']
-
-    for attempt in range(0, max_retries):
+    
+    retry_count = 0
+    response = None
+    thought_summary = ""
+    
+    while not response:
         try:
-            response, completion = generate_responses(
+            response, completion, thought_summary = generate_response(
                 prompt = prompt,
                 args = args
             )
-
-            thought = completion.choices[0].message.reasoning_content
-            if args.verbose:
-                print('\nPrompt: ', prompt)
-                print('\nResponse: ', response)
-                print('\nThought: ', thought)
-            
-            task['response'] = response
-            task['thought'] = thought
-            task['completion_tokens'] = completion.usage.completion_tokens
-            task['reasoning_tokens'] = completion.usage.completion_tokens_details.reasoning_tokens
-            # sleep to avoid rate limit
-            time.sleep(random.uniform(1.0, 2.0))
-            return task, completion
-        
         except Exception as e:
-            logging.warning(f"Attempt {attempt}/{max_retries} failed: {e}")
-            trace = traceback.format_exc()
-            logging.warning(trace)
-            with open('error_log.txt', 'a') as f:
-                f.write("**"*20)
-                f.write(f"output path: {args.output_dir}\n")
-                f.write(f"Attempt {attempt}/{max_retries} failed: {e}\n")
-                f.write(trace)
-                f.write("\n")
-            if attempt == max_retries:
-                logging.error(f"Max retries reached for task ID {task.get('id', '[unknown]')}.")
-                raise e
-            time.sleep(random.uniform(2, 8))
+            retry_count += 1
+            logging.warning(f"!! Retry {retry_count}/{max_retries} for task {task['id']}|| Error: {e}")
+            if retry_count >= max_retries:
+                raise Exception("Max retries reached")
+            time.sleep(2)
+        
+    if args.verbose:
+        print(f"\nPrompt: {prompt}")
+        print(f"\nResponse: {response}")
+        print(f"\nThought Summary: {thought_summary}")
     
+    task['response'] = response
+    task['thought_summary'] = thought_summary
+    task['reasoning_tokens'] = 0 if not completion.usage_metadata.thoughts_token_count \
+        else completion.usage_metadata.thoughts_token_count
+    task['response_tokens'] = completion.usage_metadata.candidates_token_count
+    
+    # sleep to avoid rate limit    
+    time.sleep(random.uniform(0.2, 0.8))
+    
+    return task, completion
 
 def main(args):
     dt_string = datetime.now().strftime("%m_%d_%H_%M")
@@ -82,10 +86,9 @@ def main(args):
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
     
-    logging.critical(f"Writing to: {args.output_dir}")    
-    logging.critical(f"Model: {args.model} with reasoning effort: {args.effort}")
+    logging.critical(f"Thinking Budget: {args.thinking_budget} || Writing to: {args.output_dir}")    
+    output_path = f"{args.output_dir}/{args.model}_tb{args.thinking_budget}_s{args.start}_e{end_index}_{dt_string}.jsonl"
     
-    output_path = f"{args.output_dir}/{args.model}_{args.effort}_s{args.start}_e{end_index}_{dt_string}.jsonl"
     tasks = all_data[args.start:end_index] 
     total_tasks = len(tasks)
     completed_tasks = 0
@@ -96,7 +99,7 @@ def main(args):
         # Progress bar with TQDM
         with tqdm(total=total_tasks) as pbar:
             for future in concurrent.futures.as_completed(futures):
-                task = futures[future]
+                task = futures[future]      
                 try:
                     result, completion = future.result()
                     jsonlines_dump(output_path, result)
@@ -108,7 +111,6 @@ def main(args):
                     }
                     error_output_path = output_path.replace('.jsonl', '_error.jsonl')
                     jsonlines_dump(error_output_path, error_result)
-                    continue
                     
                 completed_tasks += 1
                 pbar.update(1)
@@ -120,24 +122,24 @@ def main(args):
                 estimated_remaining_time = remaining_tasks * avg_time_per_task
                 pbar.set_postfix(eta=f"{estimated_remaining_time:.2f}s")
 
+    # Final log
     total_time = time.time() - start_time
     print(f"All tasks completed in {total_time:.2f} seconds.")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    
     parser.add_argument('--input_path', type=str, \
         default='benchmarks/simpleqa_800.jsonl')
     parser.add_argument('--output_dir', type=str, default="model_responses")
     
-    parser.add_argument('--start', type=int, default = 0)
+    parser.add_argument('--start', type=int, default=0)
     parser.add_argument('--end', type=int, default = -1)
     
-    parser.add_argument('--model', type=str, default='grok-3-mini')
-    parser.add_argument('--api_key', type=str, required=True)
-    parser.add_argument('--effort', type=str, default='low',
-        choices=["low", "high"],\
-        help="Reasoning effort level for Grok-3. [low, high]")
-    parser.add_argument("--temperature", type=float, default=0.0)
+    parser.add_argument('--model', type=str, default='gemini-2.5-flash')
+    parser.add_argument('--api_key', type=str, required=True) 
+    parser.add_argument('-tb', '--thinking_budget', type=int, default=256,\
+        help="Budget ranges from 0 to 24576. Setting to 0 disables thinking.")
 
     parser.add_argument("--workers", type=int, default = 2,\
         help="Number of workers for multi-processing")    

@@ -1,4 +1,4 @@
-"""This file is used to generate responses from Anthropic Claude models."""
+"""Generate responses from Anthropic Claude models."""
 import argparse
 import logging
 import time

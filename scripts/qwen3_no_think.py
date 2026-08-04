@@ -1,4 +1,4 @@
-"""This file is used to generate responses from Qwen3 models (non-thinking mode)."""
+"""Generate responses from Qwen3 models in non-thinking mode."""
 import argparse
 import os
 import time

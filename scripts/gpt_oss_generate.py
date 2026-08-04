@@ -1,4 +1,4 @@
-"""This file is used to generate responses from gpt-oss models."""
+"""Generate responses from OpenAI gpt-oss models."""
 import argparse
 import torch
 import os
