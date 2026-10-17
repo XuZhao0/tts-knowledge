@@ -115,14 +115,13 @@ We release evaluated outputs from 14 reasoning models with varying thinking leve
 If you find our code or data useful, please cite:
 
 ```bibtex
-@article{zhao2025testtimescalingreasoningmodels,
-      title={Test-Time Scaling in Reasoning Models Is Not Effective for Knowledge-Intensive Tasks Yet}, 
-      author={James Xu Zhao and Bryan Hooi and See-Kiong Ng},
-      year={2025},
-      eprint={2509.06861},
-      archivePrefix={arXiv},
-      primaryClass={cs.AI},
-      url={https://arxiv.org/abs/2509.06861}, 
+@inproceedings{
+zhao2026testtime,
+title={Test-Time Scaling in Reasoning Models Is Not Effective for Knowledge-Intensive Tasks Yet},
+author={James Xu Zhao and Bryan Hooi and See-Kiong Ng},
+booktitle={Third Conference on Language Modeling},
+year={2026},
+url={https://openreview.net/forum?id=pSt4QKgs1j}
 }
 ```
 
